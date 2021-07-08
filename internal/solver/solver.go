@@ -2,12 +2,14 @@ package solver
 
 import (
 	"errors"
+	"fmt"
 	"waterjugserver/internal/jug"
 )
 
 type Step struct {
 	X int `json:"X"`
 	Y int `json:"Y"`
+	Explanation string `json:"Explanation"`
 }
 
 var errProblemCantBeSolved = errors.New("the problem can't be solved")
@@ -28,8 +30,8 @@ func Solve(x int, y int, z int) ([]Step, error) {
 
 func newSolver(x, y, z int) solver {
 	return solver{
-		from:   jug.New(x),
-		to:     jug.New(y),
+		from:   jug.New(x,"X"),
+		to:     jug.New(y,"Y"),
 		target: z,
 		result: make([]Step,0),
 	}
@@ -102,23 +104,23 @@ type solver struct {
 
 func (s *solver) transfer(from, to jug.Jug) {
 	jug.Transfer(from, to)
-	s.appendResults()
+	s.appendResults(fmt.Sprintf("transfer water from: %s, to: %s",from.Name(),to.Name()))
 }
 
 func (s *solver) fill(j jug.Jug) {
 	j.Fill()
-	s.appendResults()
+	s.appendResults(fmt.Sprintf("fill bucket: %s",j.Name()))
 }
 
 func (s *solver) empty(j jug.Jug) {
 	j.Empty()
-	s.appendResults()
+	s.appendResults(fmt.Sprintf("empty bucket: %s",j.Name()))
 }
 
 func (s *solver) done() bool {
 	return s.from.CurAmount() == s.target || s.to.CurAmount() == s.target
 }
 
-func (s *solver) appendResults() {
-	s.result = append(s.result, Step{X: s.from.CurAmount(), Y: s.to.CurAmount()})
+func (s *solver) appendResults(explanation string) {
+	s.result = append(s.result, Step{X: s.from.CurAmount(), Y: s.to.CurAmount(),Explanation: explanation})
 }

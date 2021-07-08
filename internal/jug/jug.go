@@ -5,6 +5,7 @@ import "errors"
 var errNotEnoughSpace = errors.New("not enough space in target jug")
 
 type Jug interface {
+	Name() string
 	Fill()
 	Empty()
 	CurAmount() int
@@ -13,12 +14,17 @@ type Jug interface {
 }
 
 type jug struct {
+	name string
 	curAmount int
 	size      int
 }
 
-func New(size int) Jug {
-	return &jug{size: size}
+func New(size int,name string) Jug {
+	return &jug{size: size,name: name}
+}
+
+func (j *jug) Name() string {
+	return j.name
 }
 
 func (j *jug) Fill() {

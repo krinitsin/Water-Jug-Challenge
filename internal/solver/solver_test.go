@@ -9,7 +9,7 @@ func Test_solverFill(t *testing.T) {
 	s := newSolver(5, 5, 5)
 
 	s.fill(s.from)
-	require.Equal(t, []Step{{5, 0}}, s.result)
+	require.Equal(t, []Step{{5, 0,"fill bucket: X"}}, s.result)
 	require.Equal(t, 5, s.from.CurAmount())
 	require.Equal(t, 0, s.to.CurAmount())
 }
@@ -19,7 +19,7 @@ func Test_solverEmpty(t *testing.T) {
 
 	s.fill(s.from)
 	s.empty(s.from)
-	require.Equal(t, []Step{{5, 0}, {0, 0}}, s.result)
+	require.Equal(t, []Step{{5, 0,"fill bucket: X"}, {0, 0,"empty bucket: X"}}, s.result)
 	require.Equal(t, 0, s.from.CurAmount())
 	require.Equal(t, 0, s.to.CurAmount())
 }
@@ -29,7 +29,7 @@ func Test_solverTransfer(t *testing.T) {
 
 	s.fill(s.from)
 	s.transfer(s.from, s.to)
-	require.Equal(t, []Step{{5, 0}, {2, 3}}, s.result)
+	require.Equal(t, []Step{{5, 0,"fill bucket: X"}, {2, 3,"transfer water from: X, to: Y"}}, s.result)
 	require.Equal(t, 2, s.from.CurAmount())
 	require.Equal(t, 3, s.to.CurAmount())
 }
@@ -126,11 +126,19 @@ func Test_Solve(t *testing.T) {
 	}{
 		{name: "solve from big to small ",
 			in:  in{x: 10, y: 2, z: 4},
-			out: out{steps: []Step{{2, 0}, {0, 2}, {2, 2}, {0, 4}}},
+			out: out{steps: []Step{
+				{2, 0,"fill bucket: X"},
+				{0, 2,"transfer water from: X, to: Y"},
+				{2, 2,"fill bucket: X"},
+				{0, 4,"transfer water from: X, to: Y"}}},
 		},
 		{name: "solve from small to big",
 			in:  in{x: 2, y: 10, z: 4},
-			out: out{steps: []Step{{2, 0}, {0, 2}, {2, 2}, {0, 4}}},
+			out: out{steps: []Step{
+			{2, 0,"fill bucket: X"},
+			{0, 2,"transfer water from: X, to: Y"},
+			{2, 2,"fill bucket: X"},
+			{0, 4,"transfer water from: X, to: Y"}}},
 		},
 		{name: "unsolvable",
 			in:  in{x: 3, y: 3, z: 9},
@@ -170,11 +178,21 @@ func Test_solve(t *testing.T) {
 	}{
 		{name: "solve from big to small ",
 			in:  in{x: 15, y: 3, z: 9},
-			out: out{steps: []Step{{15, 0}, {12, 3}, {12, 0}, {9, 3}}},
+			out: out{steps: []Step{
+			{15, 0,"fill bucket: X"},
+			{12, 3,"transfer water from: X, to: Y"},
+			{12, 0,"empty bucket: Y"},
+			{9, 3,"transfer water from: X, to: Y"}}},
 		},
 		{name: "solve from big to small ",
 			in:  in{x: 3, y: 15, z: 9},
-			out: out{steps: []Step{{3, 0}, {0, 3}, {3, 3}, {0, 6}, {3, 6}, {0, 9}}},
+			out: out{steps: []Step{
+			{3, 0,"fill bucket: X"},
+			{0, 3,"transfer water from: X, to: Y"},
+			{3, 3,"fill bucket: X"},
+			{0, 6,"transfer water from: X, to: Y"},
+			{3, 6,"fill bucket: X"},
+			{0, 9,"transfer water from: X, to: Y"}}},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
